@@ -11,19 +11,23 @@ import re
 from Koala import Koala
 from bs4 import BeautifulSoup
 from video_info import Video_Info
+from WebTool import WebTool
+from bs4 import BeautifulSoup
+import urllib
 
-class Hakuzy(Koala):
-    def __init__(self, webSiteURL, entryFilter=None, yieldFilter=None, identifier=None, enableStatusSupport=False):
-        Koala.__init__(self, webSiteURL, entryFilter, yieldFilter, identifier, enableStatusSupport)
-        self.__total_size = 0
-        self.video_list = list()
-        print "Hakuzy.__init__"
+class HakuzyVideoParser(object):
     
-    def parse(self, soup):
+    def parse(self, soup, video_info):
+        '''
+            parse text to VideoInfo 
+            @author:douzifly
+            @param soup:
+            @param video_info: Video_Info object to be filled  
+        '''
+        assert soup != None and video_info != None
+        
         html = soup.get_text()
         #print html
-        print  u"#####################"
-        video_info = Video_Info()
         self.parse_title(html, video_info)
         self.parse_actors(html, video_info)
         self.parse_director(html, video_info)
@@ -35,13 +39,8 @@ class Hakuzy(Koala):
         self.parse_statues(html, video_info)
         self.parse_img(soup, video_info)
         self.parse_qhash_list(soup, video_info)
-        
-        for qhash in video_info.qhash_list:
-            print qhash
-            
-        if len(video_info.qhash_list) > 0:
-            self.video_list.append(video_info)
-        
+        pass
+    
     def parse_title(self, html, video_info):
         match = re.search(u'影片名称开始代码(.*)影片名称结束代码', html)
         if match:
@@ -122,8 +121,30 @@ class Hakuzy(Koala):
             vaule = input_area.get('value')
             if vaule.lower().startswith("qvod:"):
                 video_info.qhash_list.append(vaule);
-              
-                
+
+class Hakuzy(Koala):
+    def __init__(self, webSiteURL, entryFilter=None, yieldFilter=None, identifier=None, enableStatusSupport=False):
+        Koala.__init__(self, webSiteURL, entryFilter, yieldFilter, identifier, enableStatusSupport)
+        self.__total_size = 0
+        self.video_list = list()
+        self.video_parser = HakuzyVideoParser()
+        print "Hakuzy.__init__"
+    
+    def parse(self, soup):
+        #print html
+        if not soup:
+            print("ERROR:soup is None")
+            return
+        
+        print  u"#####################"
+        video_info = Video_Info()
+        self.video_parser.parse(soup, video_info)
+        
+        for qhash in video_info.qhash_list:
+            print qhash
+            
+        if len(video_info.qhash_list) > 0:
+            self.video_list.append(video_info)
                 
 def start_crawl():  
     '''
@@ -143,6 +164,30 @@ def start_crawl():
     for url in hakuzy.go(10):
         print url
         pass
+    
+def search(keyword):
+    ''' 
+        search content for keyword
+        @author: douzifly
+    '''
+    if not keyword:
+        return
+    url = "http://www.hakuzy.com/search.asp"
+    params = {"searchword": keyword}
+    html = WebTool.request(url, params, "post") # replace with other lib
+    if not html:
+        print("ERROR:cant get html")
+        return
+    html = html.decode("gbk")
+    print(html) # this html only contain search result, no hash
+    soup = BeautifulSoup(html)
+    parser = HakuzyVideoParser() # do not create parse every time
+    video_info = Video_Info()
+    parser.parse(soup, video_info)
+    print("###################")
+    print(video_info)
+    
+    pass
     
     
 def test_parse():
@@ -179,4 +224,5 @@ def test_parse():
 if __name__ == "__main__":
     start_crawl()
     #test_parse()
+    #search("Walking")
 

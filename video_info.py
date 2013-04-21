@@ -18,5 +18,11 @@ class Video_Info:
         self.public_time = ''
         self.status = ''
         self.brief = ''
-        
         self.qhash_list = list()
+    
+    def __str__(self, *args, **kwargs):
+        out = self.title+":"
+        for qhash in self.qhash_list:
+            out += qhash+","
+        return out
+    
