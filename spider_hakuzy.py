@@ -17,6 +17,27 @@ import urllib
 
 class HakuzyVideoParser(object):
     
+    
+    def parse_search_page(self, html):
+        '''
+            解析搜索结果中的影片链接 可能有多个
+            @author: douzifly
+            @return: list(Video_Info) 只会填充 url_in_search
+        '''
+
+        matches = re.findall(u"影片链接开始代码(.*)影片链接结束代码", html)
+        if not matches:
+            return None
+        videos = list()
+        for match in matches:
+            match = match.replace("-->//","").replace("<!--", "") # 不效率 
+            print(match)
+            v = Video_Info()
+            v.url_in_search = "http://www.hakuzy.com/" + match
+            videos.append(v)
+            pass
+        return videos
+    
     def parse(self, soup, video_info):
         '''
             parse text to VideoInfo 
@@ -173,20 +194,31 @@ def search(keyword):
     if not keyword:
         return
     url = "http://www.hakuzy.com/search.asp"
-    params = {"searchword": keyword}
+    params = {"searchword": keyword.encode("gbk")}
     html = WebTool.request(url, params, "post") # replace with other lib
     if not html:
         print("ERROR:cant get html")
         return
     html = html.decode("gbk")
     print(html) # this html only contain search result, no hash
-    soup = BeautifulSoup(html)
     parser = HakuzyVideoParser() # do not create parse every time
-    video_info = Video_Info()
-    parser.parse(soup, video_info)
-    print("###################")
-    print(video_info)
+   
+    # find video links
+    videos = parser.parse_search_page(html)
+    if not videos:
+        return 
     
+    for video in videos:
+        html = WebTool.request(video.url_in_search)
+        if not html:
+            continue
+        html = html.decode("gbk")
+        soup = BeautifulSoup(html)
+        video_info = Video_Info()
+        parser.parse(soup, video_info)
+        print("###################")
+        print(video_info)
+
     pass
     
     
@@ -222,7 +254,7 @@ def test_parse():
     
     
 if __name__ == "__main__":
-    start_crawl()
+    #start_crawl()
     #test_parse()
-    #search("Walking")
+    search("毒战")
 

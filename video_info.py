@@ -1,10 +1,12 @@
+# -*- coding:utf-8 -*-
+
 '''
 Created on 2013-4-21
 
 @author: niexinxin
 '''
 
-class Video_Info:
+class Video_Info(object):
     def __init__(self):
         self.title = ''
         self.img = ''
@@ -19,6 +21,8 @@ class Video_Info:
         self.status = ''
         self.brief = ''
         self.qhash_list = list()
+        #搜索结果中的
+        self.url_in_search = ''
     
     def __str__(self, *args, **kwargs):
         out = self.title+":"
