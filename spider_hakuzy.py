@@ -22,7 +22,7 @@ class HakuzyVideoParser(object):
         '''
                               解析搜索结果中的影片链接 可能有多个
             @author: douzifly
-            @return: list(Video_Info) 只会填充 url_in_search
+            @return: 影片详情页的url
         '''
 
         matches = re.findall(u"影片链接开始代码(.*)影片链接结束代码", html)
@@ -199,8 +199,8 @@ def search(keyword):
     parser = HakuzyVideoParser() # do not create parse every time
    
     # find video links
-    for search_url in parser.parse_search_page(html):
-        html = WebTool.request(search_url)
+    for url in parser.parse_search_page(html):
+        html = WebTool.request(url)
         html = html.decode("gbk")
         soup = BeautifulSoup(html)
         video_info = Video_Info()
