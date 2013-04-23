@@ -20,23 +20,17 @@ class HakuzyVideoParser(object):
     
     def parse_search_page(self, html):
         '''
-            解析搜索结果中的影片链接 可能有多个
+                              解析搜索结果中的影片链接 可能有多个
             @author: douzifly
             @return: list(Video_Info) 只会填充 url_in_search
         '''
 
         matches = re.findall(u"影片链接开始代码(.*)影片链接结束代码", html)
-        if not matches:
-            return None
-        videos = list()
         for match in matches:
             match = match.replace("-->//","").replace("<!--", "") # 不效率 
             print(match)
-            v = Video_Info()
-            v.url_in_search = "http://www.hakuzy.com/" + match
-            videos.append(v)
-            pass
-        return videos
+            url_in_search = "http://www.hakuzy.com/" + match
+            yield url_in_search
     
     def parse(self, soup, video_info):
         '''
@@ -205,25 +199,17 @@ def search(keyword):
     parser = HakuzyVideoParser() # do not create parse every time
    
     # find video links
-    videos = parser.parse_search_page(html)
-    if not videos:
-        return 
-    
-    for video in videos:
-        html = WebTool.request(video.url_in_search)
-        if not html:
-            continue
+    for search_url in parser.parse_search_page(html):
+        html = WebTool.request(search_url)
         html = html.decode("gbk")
         soup = BeautifulSoup(html)
         video_info = Video_Info()
         parser.parse(soup, video_info)
         print("###################")
         print(video_info)
-
-    pass
     
 if __name__ == "__main__":
-    start_crawl()
+    #start_crawl()
     #test_parse()
-    #search("北京遇上西雅图")
+    search("爱情公寓")
 
