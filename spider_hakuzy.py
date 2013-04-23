@@ -12,8 +12,8 @@ from Koala import Koala
 from bs4 import BeautifulSoup
 from video_info import Video_Info
 from WebTool import WebTool
-from bs4 import BeautifulSoup
-import urllib
+import time
+import Config
 
 class HakuzyVideoParser(object):
     
@@ -177,13 +177,13 @@ def start_crawl():
 
     yieldFilter = dict()
     yieldFilter['Type'] = 'allow'
-    yieldFilter['List'] = [r'\.html$', ]
+    yieldFilter['List'] = [r'www\.hakuzy\.com/detail/.*\.html$', ]
 
 
     hakuzy = Hakuzy("http://www.hakuzy.com/", entryFilter, yieldFilter);
     #hakuzy = Hakuzy("www.hakuzy.com/detail/?47931.html", entryFilter, yieldFilter, enableStatusSupport=False);
     for url in hakuzy.go(10):
-        print url
+        #print url
         pass
     
 def search(keyword):
@@ -254,7 +254,7 @@ def test_parse():
     
     
 if __name__ == "__main__":
-    #start_crawl()
+    start_crawl()
     #test_parse()
-    search("毒战")
+    #search("北京遇上西雅图")
 

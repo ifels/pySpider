@@ -4,12 +4,9 @@
 from bs4 import BeautifulSoup
 import re
 import uuid
-import time
 import urlparse
-import requests
 import pymongo
-import tldextract
-import Common
+import Utils
 import Config
 
 '''
@@ -105,12 +102,12 @@ class KoalaStatus(object):
 		'''
 		for entryURL in nextEntries:
 			doc = dict()
-			doc[KoalaStatus.DOC_FIELD_HASH] 	 = Common.hash(entryURL)
+			doc[KoalaStatus.DOC_FIELD_HASH] 	 = Utils.hash(entryURL)
 			doc[KoalaStatus.DOC_FIELD_URL] 		 = entryURL
 			try:
 				self.collNextEntry.insert(doc, safe=True)
 			except pymongo.errors.DuplicateKeyError as error:
-				Common.write_stderr(repr(error))
+				Utils.write_stderr(repr(error))
 
 	def remove_next_entry(self, nextEntries):
 		'''
@@ -122,7 +119,7 @@ class KoalaStatus(object):
 		@return: 无
 		'''
 		for entryURL in nextEntries:
-			self.collNextEntry.remove({KoalaStatus.DOC_FIELD_HASH: Common.hash(entryURL)}, safe=True)
+			self.collNextEntry.remove({KoalaStatus.DOC_FIELD_HASH: Utils.hash(entryURL)}, safe=True)
 
 
 class Koala(object):
@@ -155,12 +152,12 @@ class Koala(object):
 		if not webSiteURL:
 			raise ValueError('You must specified "webSiteURL" parameter in constructor')
 
-		webSiteURL = Common.to_unicode(webSiteURL)
+		webSiteURL = Utils.to_unicode(webSiteURL)
 
 		# 如果url没有协议前缀，则使用默认协议前缀
-		webSiteURL = ensure_url_default_scheme(webSiteURL)
+		webSiteURL = Utils.ensure_url_default_scheme(webSiteURL)
 
-		self.domain 		 = get_domain(webSiteURL)
+		self.domain 		 = Utils.get_domain(webSiteURL)
 		self.webSiteURL 	 = webSiteURL
 		self.entryFilter 	 = entryFilter
 		self.yieldFilter 	 = yieldFilter
@@ -175,7 +172,7 @@ class Koala(object):
 		if not enableStatusSupport:
 			self.koalaStatus = None
 		else:
-			self.koalaStatus = KoalaStatus(Common.hash(self.webSiteURL))
+			self.koalaStatus = KoalaStatus(Utils.hash(self.webSiteURL))
 
 		# 记录访问过的页面
 		self.visitedEntriesHash = set()
@@ -230,12 +227,12 @@ class Koala(object):
 
 		# 解析出页面中所有的链接
 		try:
-			source = get_url_html(entryURL)
-			#soup = BeautifulSoup(source, Config.DEFAULT_HTML_PARSER)
-			soup = BeautifulSoup(source)
-			self.__parse(soup)
+			source = Utils.get_url_html(entryURL)
+			soup = BeautifulSoup(source, Config.DEFAULT_HTML_PARSER)
+			if self.__yield_filter(entryURL):
+				self.__parse(soup)
 		except Exception as error:
-			Common.write_stderr(repr(error))
+			Utils.write_stderr(repr(error))
 			return
 		links = list()
 		for elemA in soup.find_all('a'):
@@ -258,7 +255,7 @@ class Koala(object):
 		# 执行到此处代表一个（子）页面（EntryURL）处理完成
 
 		# 需要记录到已处理页面集合中。处于性能考虑，记录url的hash值而非url本身
-		self.visitedEntriesHash.add(Common.hash(entryURL))
+		self.visitedEntriesHash.add(Utils.hash(entryURL))
 
 		# 如果启用状态支持，则同步删除数据库中对应的NextEntry数据（如果有的话）
 		if self.koalaStatus:
@@ -274,7 +271,7 @@ class Koala(object):
 
 			# 广度优先抓取
 			for nextEntryURL in nextEntries:
-				if Common.hash(nextEntryURL) not in self.visitedEntriesHash:
+				if Utils.hash(nextEntryURL) not in self.visitedEntriesHash:
 					for url in self.__crawl_proc(nextEntryURL, maxDepth - 1):
 						yield url
 
@@ -291,15 +288,15 @@ class Koala(object):
 		@rtype: 布尔值
 		'''
 		# 不能为非本站的url
-		if get_domain(checkURL) != self.domain:
+		if Utils.get_domain(checkURL) != self.domain:
 			return False
 
 		# 不能和站点url相同
-		if is_two_url_same(self.webSiteURL, checkURL):
+		if Utils.is_two_url_same(self.webSiteURL, checkURL):
 			return False
 
 		# 不能和当前正在处理的页面url相同
-		if is_two_url_same(currentEntryURL, checkURL):
+		if Utils.is_two_url_same(currentEntryURL, checkURL):
 			return False
 
 		return True
@@ -374,104 +371,4 @@ class Koala(object):
 		self.parse(beautifulSoup) #Expected to be defined
 
 
-def get_url_html(url):
-	'''
-	获取url的html超文本
-
-	@param url: url地址
-	@type url: 字符串
-
-	@return: 成功则返回html，失败则触发异常
-	@rtype: 字符串
-	'''
-	# 自定义header
-	customHeader = dict()
-	customHeader['User-Agent'] = Config.KOALA_USER_AGENT
-
-	# 网络出错重试机制
-	retryTimes = 0
-	while True:
-		try:
-			# 先发送head做检测工作
-			rsp = requests.head(url, headers=customHeader)
-			if not rsp.ok:
-				rsp.raise_for_status()
-			if not rsp.headers['content-type'].startswith('text/html'):
-				raise TypeError('Specified url do not return HTML file')
-
-			rsp = requests.get(url, headers=customHeader)
-			return Common.to_unicode(rsp.content)
-		except requests.exceptions.RequestException as error:
-			Common.write_stderr(repr(error))
-			if retryTimes < Config.NETWORK_ERROR_MAX_RETRY_TIMES:
-				retryTimes += 1
-				time.sleep(Config.NETWORK_ERROR_WAIT_SECOND)
-			else:
-				raise
-
-def is_two_url_same(url1, url2):
-	'''
-	比较两个url是否相同
-
-	@param url1: 第一个url
-	@type url1: 字符串
-	@param url2: 第二个url
-	@type url2: 字符串
-
-	@return: 相同返回True，不同返回False
-	@rtype: 布尔值
-	'''
-	pattern = re.compile(r'^[^:]+://', re.I | re.U)
-	# 去除scheme前缀
-	if pattern.search(url1):
-		u1 = pattern.sub('', url1)
-	else:
-		u1 = url1
-	if pattern.search(url2):
-		u2 = pattern.sub('', url2)
-	else:
-		u2 = url2
-	# 尾部保持/
-	if not u1.endswith('/'):
-		u1 += '/'
-	if not u2.endswith('/'):
-		u2 += '/'
-
-	return u1 == u2
-
-
-def ensure_url_default_scheme(url):
-	'''
-	确保没有http前缀的url地址以默认http前缀开头
-
-	@param url: url地址
-	@type url: 字符串
-
-	@return: 处理后的url地址
-	@rtype: 字符串
-	'''
-	# 检查url前缀，如果没有则添加默认前缀
-	if not urlparse.urlsplit(url).scheme:
-		return Config.URL_DEFAULT_SCHEME + url
-	else:
-		return url
-
-
-def get_domain(url):
-	'''
-	从url地址里提取域名部分
-
-	@param url: url地址
-	@type url: 字符串
-
-	@return: 域名部分
-	@rtype: 字符串
-	'''
-	tldStruct = tldextract.extract(url)
-	if tldStruct.tld:
-		domain = tldStruct.domain + '.' + tldStruct.tld
-	else:
-		domain = tldStruct.domain
-
-	return domain
 
