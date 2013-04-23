@@ -20,9 +20,9 @@ class HakuzyVideoParser(object):
     
     def parse_search_page(self, html):
         '''
-                              解析搜索结果中的影片链接 可能有多个
-            @author: douzifly
-            @return: 影片详情页的url
+        解析搜索结果中的影片链接 可能有多个
+        author: douzifly
+        @return: 影片详情页的url
         '''
 
         matches = re.findall(u"影片链接开始代码(.*)影片链接结束代码", html)
