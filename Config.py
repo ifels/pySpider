@@ -19,3 +19,5 @@ DEFAULT_HTML_PARSER = 'html'
 # 网络出错的等待/重试
 NETWORK_ERROR_MAX_RETRY_TIMES = 3		# 最多重试3次
 NETWORK_ERROR_WAIT_SECOND = 60			# 重试前等待60秒
+
+NETWORK_REQUST_INTERVAL = 0.1           #网页抓取的间隙100ms

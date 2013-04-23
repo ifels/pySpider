@@ -184,6 +184,7 @@ def start_crawl():
     #hakuzy = Hakuzy("www.hakuzy.com/detail/?47931.html", entryFilter, yieldFilter, enableStatusSupport=False);
     for url in hakuzy.go(10):
         #print url
+        time.sleep(Config.NETWORK_REQUST_INTERVAL);
         pass
     
 def search(keyword):
@@ -220,38 +221,6 @@ def search(keyword):
         print(video_info)
 
     pass
-    
-    
-def test_parse():
-    doc2 = u"""
-    <html><head><title>The Dormouse's story</title></head>
-    <p class="title"><b>The Dormouse's story</b></p>
-    <p class="story">Once upon a time there were three little sisters; and their names were</p>
-    <p class="story">Once upon a time there were three little2 更新; and their names were</p>
-    <a href="http://example.com/elsie" class="sister" id="link1">Elsie</a>,
-    <a href="http://example.com/lacie" class="sister" id="link2">Lacie</a> and
-    <a href="http://example.com/tillie" class="sister" id="link3">Tillie</a>;
-    and they lived at the bottom of a well.</p>
-    <p class="story">...</p>
-    """
-    
-    match = re.search(u".*更新(.*)and", doc2)
-    print match
-    if match:
-        print match.group(1)
-    
-    print "##################"
-    
-    soup = BeautifulSoup(doc2)
-    pattern = re.compile(r'sisters')
-    match = pattern.match(doc2)
-    print match
-    if match:
-        print match.group()  
-
-    txt = soup.find(text=re.compile(u"sisters"))
-    print txt
-    
     
 if __name__ == "__main__":
     start_crawl()
