@@ -1,4 +1,4 @@
-#coding: UTF-8
+# -*- coding:utf-8 -*-
 
 '''
 Created on 2013-4-20
@@ -14,6 +14,7 @@ from video_info import Video_Info
 from WebTool import WebTool
 import time
 import Config
+from db.video_tb import VideoTb
 
 class HakuzyVideoParser(object):
     
@@ -181,6 +182,7 @@ def start_crawl():
         time.sleep(Config.NETWORK_REQUST_INTERVAL);
         pass
     
+v = VideoTb()
 def search(keyword):
     ''' 
         search content for keyword
@@ -199,17 +201,23 @@ def search(keyword):
     parser = HakuzyVideoParser() # do not create parse every time
    
     # find video links
+    openok = v.open()
+    print("opendb:" + str(openok))
     for url in parser.parse_search_page(html):
         html = WebTool.request(url)
         html = html.decode("gbk")
         soup = BeautifulSoup(html)
         video_info = Video_Info()
+        video_info.ref_url = url
         parser.parse(soup, video_info)
         print("###################")
         print(video_info)
+        if openok:
+            v.insert(title = video_info.title, hast_list = video_info.qhash_list[0])
+    v.close()
     
 if __name__ == "__main__":
     #start_crawl()
     #test_parse()
-    search("爱情公寓")
+    search("行尸走肉")
 

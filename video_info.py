@@ -21,8 +21,8 @@ class Video_Info(object):
         self.status = ''
         self.brief = ''
         self.qhash_list = list()
-        #搜索结果中的
-        self.url_in_search = ''
+        #引用页
+        self.ref_url = ''
     
     def __str__(self, *args, **kwargs):
         out = self.title+":"
