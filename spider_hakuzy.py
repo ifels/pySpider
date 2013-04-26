@@ -10,7 +10,7 @@ Hakuzy类 用于采集http://www.hakuzy.com 网站上的快播资源
 import re
 from Koala import Koala
 from bs4 import BeautifulSoup
-from video_info import Video_Info
+from model.video_info import Video_Info
 from WebTool import WebTool
 import time
 import Config
@@ -213,11 +213,11 @@ def search(keyword):
         print("###################")
         print(video_info)
         if openok:
-            v.insert(title = video_info.title, hast_list = video_info.qhash_list[0])
+            v.insert(video_info)
     v.close()
     
 if __name__ == "__main__":
     #start_crawl()
     #test_parse()
-    search("行尸走肉")
+    search("西游记")
 

@@ -2,12 +2,11 @@
 
 '''
 Created on Apr 25, 2013
-操作视频biao
+操作视频表
 @author: douzifly
 '''
 
 from db_base import DbBase
-from db_base import build_sql
 
 class VideoTb(DbBase):
 
@@ -15,12 +14,5 @@ class VideoTb(DbBase):
         DbBase.__init__(self)
         self.tb_name = "tb_video"
     
-    def insert(self, **kwds):
-        sql = build_sql(self.tb_name, "insert", **kwds)
-        if not sql:
-            print("sql is none")
-            return False
-        ok = self.execute(sql)
-        print("exec sql:%s, ok:%s" % (sql, ok))
-    
-        
+    def insert(self, video_info):
+        DbBase.insert(self, self.tb_name, title = video_info.title,hash = video_info.qhash_list[0])

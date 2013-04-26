@@ -24,7 +24,7 @@ def build_sql(tb_name, action, **kwds):
                 keys += k + ","
                 values += "'" + v + "',"
             sql = sql + keys[:len(keys) - 1] + ") values (" + values[:len(values) -1 ] + ")"
-            return sql.encode("utf-8")
+            return sql
         return None
 
 class DbBase(object):
@@ -35,7 +35,7 @@ class DbBase(object):
     
     def open(self):
         try:
-            self._conn = MySQLdb.connect(host=DBHOST, user=DBUSER, passwd=DBPWD, db=DBNAME)
+            self._conn = MySQLdb.connect(host=DBHOST, user=DBUSER, passwd=DBPWD, db=DBNAME, charset='utf8')
             self._cursor = self._conn.cursor()
         except Exception as e:
             print(e)
@@ -51,9 +51,10 @@ class DbBase(object):
         if self._cursor:
             try:
                 self._cursor.execute(sql)
+                self._conn.commit()
                 return True
             except Exception as e:
-                print("ERROR:" + e)
+                print("ERROR:" + str(e))
                 return False
         return False
             
@@ -62,6 +63,14 @@ class DbBase(object):
             self._cursor.execute(sql)
             return self._cursor.fetchall()
         return False
+    
+    def insert(self, tb_name, **kwds):
+        sql = build_sql(self.tb_name, "insert", **kwds)
+        if not sql:
+            print("sql is none")
+            return False
+        ok = self.execute(sql)
+        print("exec sql:%s, ok:%s" % (sql, ok))
     
    
     
