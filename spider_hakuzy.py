@@ -15,6 +15,8 @@ from WebTool import WebTool
 import time
 import Config
 from db.video_tb import VideoTb
+import Utils
+import Log
 
 class HakuzyVideoParser(object):
     
@@ -191,13 +193,14 @@ def search(keyword):
     if not keyword:
         return
     url = "http://www.hakuzy.com/search.asp"
+    keyword = Utils.to_unicode(keyword)
     params = {"searchword": keyword.encode("gbk")}
     html = WebTool.request(url, params, "post") # replace with other lib
     if not html:
         print("ERROR:cant get html")
         return
     html = html.decode("gbk")
-    print(html) # this html only contain search result, no hash
+    Log.printf(html) # this html only contain search result, no hash
     parser = HakuzyVideoParser() # do not create parse every time
    
     # find video links
@@ -210,8 +213,8 @@ def search(keyword):
         video_info = Video_Info()
         video_info.ref_url = url
         parser.parse(soup, video_info)
-        print("###################")
-        print(video_info)
+        Log.printf("###################")
+        Log.printf(video_info)
         if openok:
             v.insert(video_info)
     v.close()
