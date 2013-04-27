@@ -17,6 +17,7 @@ import Config
 from db.video_tb import VideoTb
 import Utils
 import Log
+import logging
 
 class HakuzyVideoParser(object):
     
@@ -146,6 +147,8 @@ class Hakuzy(Koala):
         self.__total_size = 0
         self.video_list = list()
         self.video_parser = HakuzyVideoParser()
+        self.db = VideoTb()
+        self.db.open()
         print "Hakuzy.__init__"
     
     def parse(self, soup):
@@ -157,12 +160,13 @@ class Hakuzy(Koala):
         print  u"#####################"
         video_info = Video_Info()
         self.video_parser.parse(soup, video_info)
-        
+
         for qhash in video_info.qhash_list:
             print qhash
             
         if len(video_info.qhash_list) > 0:
             self.video_list.append(video_info)
+            self.db.insert(video_info)
                 
 def start_crawl():  
     '''
@@ -176,12 +180,12 @@ def start_crawl():
     yieldFilter['Type'] = 'allow'
     yieldFilter['List'] = [r'www\.hakuzy\.com/detail/.*\.html$', ]
 
-
+    logging.basicConfig()
     hakuzy = Hakuzy("http://www.hakuzy.com/", entryFilter, yieldFilter);
     #hakuzy = Hakuzy("www.hakuzy.com/detail/?47931.html", entryFilter, yieldFilter, enableStatusSupport=False);
     for url in hakuzy.go(10):
         #print url
-        time.sleep(Config.NETWORK_REQUST_INTERVAL);
+        time.sleep(Config.NETWORK_REQUST_INTERVAL)
         pass
     
 v = VideoTb()
@@ -220,7 +224,7 @@ def search(keyword):
     v.close()
     
 if __name__ == "__main__":
-    #start_crawl()
+    start_crawl()
     #test_parse()
-    search("西游记")
+    #search("西游记")
 

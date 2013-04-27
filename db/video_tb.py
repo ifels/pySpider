@@ -15,4 +15,12 @@ class VideoTb(DbBase):
         self.tb_name = "tb_video"
     
     def insert(self, video_info):
-        DbBase.insert(self, self.tb_name, title = video_info.title,hash = video_info.qhash_list[0])
+        hashstr = ""
+        for hash in video_info.qhash_list:
+            hashstr += hash + ";"
+        DbBase.insert(self, self.tb_name,
+                            title = video_info.title,
+                            hash = hashstr,
+                            img = video_info.img,
+                            sub_title = video_info.sub_title
+                            )
