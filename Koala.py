@@ -157,7 +157,7 @@ class Koala(object):
 		# 如果url没有协议前缀，则使用默认协议前缀
 		webSiteURL = Utils.ensure_url_default_scheme(webSiteURL)
 
-		self.domain 		 = Utils.get_domain(webSiteURL)
+		self.domain 		 = Utils.get_host(webSiteURL)
 		self.webSiteURL 	 = webSiteURL
 		self.entryFilter 	 = entryFilter
 		self.yieldFilter 	 = yieldFilter
@@ -288,7 +288,7 @@ class Koala(object):
 		@rtype: 布尔值
 		'''
 		# 不能为非本站的url
-		if Utils.get_domain(checkURL) != self.domain:
+		if Utils.get_host(checkURL) != self.domain:
 			return False
 
 		# 不能和站点url相同

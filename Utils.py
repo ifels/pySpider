@@ -16,7 +16,7 @@ import Config
 import requests
 import time
 import urlparse
-import tldextract
+import Utils
 
 # UTF-8字符集标准命名
 UTF8_CHARSET_NAME = 'UTF-8'
@@ -94,7 +94,7 @@ def write_stdout(text):
 
     @return: 无
     '''
-    print(text, file = sys.stdout)
+    print(text, file=sys.stdout)
 
 
 def write_stderr(text):
@@ -106,7 +106,7 @@ def write_stderr(text):
 
     @return: 无
     '''
-    print(text, file = sys.stderr)
+    print(text, file=sys.stderr)
 
 
 def get_url_html(url):
@@ -143,6 +143,7 @@ def get_url_html(url):
                 time.sleep(Config.NETWORK_ERROR_WAIT_SECOND)
             else:
                 raise
+
 
 def is_two_url_same(url1, url2):
     '''
@@ -192,20 +193,13 @@ def ensure_url_default_scheme(url):
         return url
 
 
-def get_domain(url):
-    '''
-    从url地址里提取域名部分
+def get_host(url):
+    if not url:
+        return None
+    url = Utils.to_unicode(url)
+    host = urlparse.urlsplit(url).hostname
+    #print('host=%s' %host)
+    return host
 
-    @param url: url地址
-    @type url: 字符串
 
-    @return: 域名部分
-    @rtype: 字符串
-    '''
-    tldStruct = tldextract.extract(url)
-    if tldStruct.tld:
-        domain = tldStruct.domain + '.' + tldStruct.tld
-    else:
-        domain = tldStruct.domain
 
-    return domain

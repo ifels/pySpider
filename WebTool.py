@@ -8,6 +8,7 @@ Created on Apr 21, 2013
 '''
 
 import urllib2, urllib
+import Utils
 
 class WebTool(object):
 
@@ -29,7 +30,9 @@ class WebTool(object):
                 resp = urllib2.urlopen(req, params)
             else: 
                 return ""
-            return resp.read()
+
+            result = Utils.to_unicode(resp.read())
+            return result
         except Exception, e:
             print("error:", e)
             return ""

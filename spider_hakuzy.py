@@ -199,7 +199,6 @@ def search(keyword):
     if not html:
         print("ERROR:cant get html")
         return
-    html = html.decode("gbk")
     Log.printf(html) # this html only contain search result, no hash
     parser = HakuzyVideoParser() # do not create parse every time
    
@@ -208,7 +207,6 @@ def search(keyword):
     print("opendb:" + str(openok))
     for url in parser.parse_search_page(html):
         html = WebTool.request(url)
-        html = html.decode("gbk")
         soup = BeautifulSoup(html)
         video_info = Video_Info()
         video_info.ref_url = url
@@ -221,6 +219,5 @@ def search(keyword):
     
 if __name__ == "__main__":
     #start_crawl()
-    #test_parse()
     search("西游记")
 
