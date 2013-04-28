@@ -7,16 +7,14 @@ Created on 2013-4-23
 
 '''
 
-from __future__ import print_function
 from bs4 import UnicodeDammit
 import re
-import sys
 import hashlib
 import Config
 import requests
 import time
 import urlparse
-import Utils
+import Log
 
 # UTF-8字符集标准命名
 UTF8_CHARSET_NAME = 'UTF-8'
@@ -61,52 +59,10 @@ def to_unicode(byteSequence):
                 try:
                     return byteSequence.decode(find.group(1), 'ignore')
                 except Exception as error:
-                    write_stderr(repr(error))
+                    Log.write_stderr(repr(error))
         # 上述方法均不成功，则使用bs4内置的unicode转换装置
         dammit = UnicodeDammit(byteSequence)
         return dammit.unicode_markup
-
-
-def unicode_to(unicodeString, charset):
-    '''
-    转换unicode字符串到字节序列
-
-    @param unicodeString: unicode字符串
-    @type unicodeString: 字符串
-    @param charset: 希望转换到字节序列的字符集
-    @type charset: 字符串
-
-    @return: 字节序列
-    @rtype: py3下为字节串，py2下为str字符串
-    '''
-    if not isinstance(unicodeString, unicode):
-        raise TypeError('Parameter "unicodeString" is not unicode type')
-    else:
-        return unicodeString.encode(charset, 'ignore')
-
-
-def write_stdout(text):
-    '''
-    写文本到标准输出
-
-    @param text: 文本
-    @type text: 字符串
-
-    @return: 无
-    '''
-    print(text, file=sys.stdout)
-
-
-def write_stderr(text):
-    '''
-    写文本到标准错误输出
-
-    @param text: 文本
-    @type text: 字符串
-
-    @return: 无
-    '''
-    print(text, file=sys.stderr)
 
 
 def get_url_html(url):
@@ -137,7 +93,7 @@ def get_url_html(url):
             rsp = requests.get(url, headers=customHeader)
             return to_unicode(rsp.content)
         except requests.exceptions.RequestException as error:
-            write_stderr(repr(error))
+            Log.write_stderr(repr(error))
             if retryTimes < Config.NETWORK_ERROR_MAX_RETRY_TIMES:
                 retryTimes += 1
                 time.sleep(Config.NETWORK_ERROR_WAIT_SECOND)
@@ -196,7 +152,7 @@ def ensure_url_default_scheme(url):
 def get_host(url):
     if not url:
         return None
-    url = Utils.to_unicode(url)
+    url = to_unicode(url)
     host = urlparse.urlsplit(url).hostname
     #print('host=%s' %host)
     return host

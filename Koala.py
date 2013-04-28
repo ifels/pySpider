@@ -8,6 +8,7 @@ import urlparse
 import pymongo
 import Utils
 import Config
+import Log
 
 '''
 @license: Apache License 2.0
@@ -107,7 +108,7 @@ class KoalaStatus(object):
 			try:
 				self.collNextEntry.insert(doc, safe=True)
 			except pymongo.errors.DuplicateKeyError as error:
-				Utils.write_stderr(repr(error))
+				Log.write_stderr(repr(error))
 
 	def remove_next_entry(self, nextEntries):
 		'''
@@ -232,14 +233,14 @@ class Koala(object):
 			if self.__yield_filter(entryURL):
 				self.__parse(soup)
 		except Exception as error:
-			Utils.write_stderr(repr(error))
+			Log.write_stderr(repr(error))
 			return
 		links = list()
 		for elemA in soup.find_all('a'):
 			try:
 				links.append(elemA['href'])
 			except KeyError as error:
-				#Common.write_stderr(repr(error))
+				#Log.write_stderr(repr(error))
 				pass
 
 		# 生成符合规则的链接，并记录符合规则的子页面

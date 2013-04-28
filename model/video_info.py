@@ -6,6 +6,7 @@ Created on 2013-4-21
 @author: niexinxin
 '''
 
+
 class Video_Info(object):
     def __init__(self):
         self.title = ''
