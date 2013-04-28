@@ -229,6 +229,6 @@ def search(keyword):
 
 if __name__ == "__main__":
     #start_crawl()
-    search("西游记")
+    search("青春")
     Log.write_stderr('finished')
 

@@ -15,4 +15,19 @@ class VideoTb(DbBase):
         self.tb_name = "tb_video"
     
     def insert(self, video_info):
-        DbBase.insert(self, self.tb_name, title = video_info.title,hash = video_info.qhash_list[0])
+        hashes = ";".join(video_info.qhash_list)
+        DbBase.insert(self, self.tb_name,
+                      title = video_info.title,
+                      sub_title = video_info.sub_title,
+                      hash = hashes,
+                      img = video_info.img,
+                      actors = video_info.actors,
+                      director = video_info.director,
+                      video_type = video_info.type,
+                      area = video_info.area,
+                      update_time = video_info.update_time,
+                      public_time = video_info.public_time,
+                      status = video_info.status,
+                      brief = video_info.brief,
+                      ref_url = video_info.ref_url,
+                      )
