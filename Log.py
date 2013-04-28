@@ -6,6 +6,7 @@ Created on 2013-4-26
 '''
 from __future__ import print_function
 import sys
+import traceback
 from bs4 import UnicodeDammit
 from model.video_info import Video_Info
 
@@ -15,17 +16,30 @@ def write_stdout(format, *args):
     写log到标准输出
     @return: 无
     '''
-    format = format_str(format, *args)
-    print(format, file=sys.stdout)
-
+    try:
+        format = format_str(format, *args)
+        print(format, file=sys.stdout)
+    except UnicodeEncodeError:
+        print("Error happened on Log.write_stdout", file=sys.stderr)
+        print('---->exception: ', file=sys.stderr)
+        traceback.print_exc()
+        print('---->stack:', file=sys.stderr)
+        traceback.print_stack()
 
 def write_stderr(format, *args):
     '''
     写log到标准错误输出
     @return: 无
     '''
-    format = format_str(format, *args)
-    print(format, file=sys.stderr)
+    try:
+        format = format_str(format, *args)
+        print(format, file=sys.stderr)
+    except UnicodeEncodeError:
+        print("Error happened on Log.write_stderr", file=sys.stderr)
+        print('---->exception: ', file=sys.stderr)
+        traceback.print_exc()
+        print('---->stack:', file=sys.stderr)
+        traceback.print_stack()
 
 
 def format_str(format, *args):
@@ -123,6 +137,9 @@ def test():
     video_info.qhash_list = ['qvod://kdajfkldj/痞子厨子戏子.rmvb', 'qvod://kdajfkldj/痞子厨子戏子.dvd']
     write_stdout('%d, %f, %s, %s', 1, 2.0, u'视频信息', video_info)
     write_stderr("test finished!")
+
+    gbkstr = u'痞子厨子戏子'.encode('gbk', 'ignore')
+    write_stdout('gbk test %s', gbkstr)
 
 if __name__ == "__main__":
     test()

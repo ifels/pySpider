@@ -183,11 +183,11 @@ def start_crawl():
     yieldFilter['Type'] = 'allow'
     yieldFilter['List'] = [r'www\.hakuzy\.com/detail/.*\.html$', ]
 
-    hakuzy = Hakuzy("http://www.hakuzy.com/", entryFilter, yieldFilter);
+    hakuzy = Hakuzy("http://www.hakuzy.com/", entryFilter, yieldFilter)
     #hakuzy = Hakuzy("www.hakuzy.com/detail/?47931.html", entryFilter, yieldFilter, enableStatusSupport=False);
     for url in hakuzy.go(10):
         #print url
-        time.sleep(Config.NETWORK_REQUST_INTERVAL);
+        time.sleep(Config.NETWORK_REQUST_INTERVAL)
         pass
 
 
@@ -224,6 +224,7 @@ def search(keyword):
         Log.write_stdout(video_info)
         if openok:
             v.insert(video_info)
+        time.sleep(Config.NETWORK_REQUST_INTERVAL)
     v.close()
 
 
