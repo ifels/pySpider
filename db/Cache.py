@@ -33,8 +33,8 @@ class Cache(object):
         self._cachedItems.append(data)
         max = self._maxSize
         size = len(self._cachedItems)
-        if size == max - 1:
-            Log.write_stdout("cache fill, write to persistence")
+        if size == max:
+            Log.write_stdout("cache fulled, write to persistence")
             self.writeToPersistence(self._cachedItems[:max])
             del self._cachedItems[:max]
         pass
