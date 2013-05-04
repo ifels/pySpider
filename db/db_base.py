@@ -32,15 +32,22 @@ class DbBase(object):
     def __init__(self):
         self._cursor = None
         self._conn = None
+        pass
     
     def open(self):
         try:
             self._conn = MySQLdb.connect(host=DBHOST, user=DBUSER, passwd=DBPWD, db=DBNAME, charset='utf8')
+            self._conn.autocommit(False)
             self._cursor = self._conn.cursor()
         except Exception as e:
             print(e)
             return False
         return True
+
+    def commit(self):
+        if self._conn:
+            self._conn.commit()
+        pass
     
     def close(self):
         if self._cursor:

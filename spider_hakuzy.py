@@ -12,9 +12,9 @@ from Koala import Koala
 from bs4 import BeautifulSoup
 from model.video_info import Video_Info
 from WebTool import WebTool
+from db.VideoCache import VideoCache
 import time
 import Config
-from db.video_tb import VideoTb
 import Utils
 import Log
 
@@ -191,9 +191,6 @@ def start_crawl():
         pass
 
 
-v = VideoTb()
-
-
 def search(keyword):
     ''' 
         search content for keyword
@@ -212,8 +209,7 @@ def search(keyword):
     parser = HakuzyVideoParser() # do not create parse every time
 
     # find video links
-    openok = v.open()
-    Log.write_stdout('opendb:' + str(openok))
+    cache = VideoCache()
     for url in parser.parse_search_page(html):
         html = WebTool.request(url)
         soup = BeautifulSoup(html)
@@ -222,10 +218,8 @@ def search(keyword):
         parser.parse(soup, video_info)
         Log.write_stdout("###################")
         Log.write_stdout(video_info)
-        if openok:
-            v.insert(video_info)
+        cache.add(video_info)
         time.sleep(Config.NETWORK_REQUST_INTERVAL)
-    v.close()
 
 
 if __name__ == "__main__":
