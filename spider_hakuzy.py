@@ -220,6 +220,7 @@ def search(keyword):
         Log.write_stdout(video_info)
         cache.add(video_info)
         time.sleep(Config.NETWORK_REQUST_INTERVAL)
+    cache.flush()  # write left items to persistence
 
 
 if __name__ == "__main__":
